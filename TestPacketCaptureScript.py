@@ -162,7 +162,7 @@ CreateToolTip(stopButton, text="Stop packet capture")
 startButton.grid(row=0,column=0)
 stopButton.grid(row=0,column=1)
 
-label = tk.Label(app, text="For better accuracy, capture packets for 1-2 minutes!", font=('Courier',8), anchor='w', justify='left')
+label = tk.Label(app, text="For better accuracy, capture packets for 1-2 minutes!", font=('Courier',9), anchor='w', justify='left')
 label.grid(row=1, column=0, columnspan=2)
 
 app.mainloop()
