@@ -357,7 +357,7 @@ def proxy_check():
 	progressBar['value'] = 100
 	s.configure("LabeledProgressbar", text="Analysed: {0}%".format(100))
 	update_ui()
-	tk.messagebox.showinfo("VPN Probability", "Possibility of Proxy being used: {:.2%}".format(((knn_prob+mlp_prob)/2.0)))
+	tk.messagebox.showinfo("Proxy Probability", "Possibility of Proxy being used: {:.2%}".format(((knn_prob+mlp_prob)/2.0)))
 	change_buttons_state('normal')
 
 

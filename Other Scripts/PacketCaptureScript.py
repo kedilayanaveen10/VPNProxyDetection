@@ -12,12 +12,12 @@ except socket.error as e:
 	print('Socket creation failed. Error Code {} Message {}'.format(str(e[0]),str(e[1])))
 	sys.exit()
 
-outputFile = open('proxyDataset2.csv','a',newline='')
+outputFile = open('ProxyCapture.csv','w',newline='')
 writer = csv.writer(outputFile)
-'''
+
 #Write top row
 writer.writerow(['Version', 'Protocol', 'TTL', 'SrcAddress', 'DestAddress', 'SrcPort', 'DestPort', 'SeqNum', 'AckNum', 'Flag', 'DataSize', 'Service', 'Label'])
-'''
+
 #Receive packet
 while True:
 	packet = s.recvfrom(65565)
