@@ -5,6 +5,7 @@ from tkinter.filedialog import askopenfilename #to select test dataset
 from tkinter.ttk import Progressbar, Style #to display progress
 from toolTipText import * #manually created to display tooltip text
 import os #to run other python scripts
+import platform
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split #for splitting dataset into train and test data
@@ -42,7 +43,12 @@ def check_blacklist():
 
 def new_capture():
 	clear_ui()
-	os.system('sudo -A python3 TestPacketCaptureScript.py') #run script to create new packet capture file
+	#run script to create new packet capture file
+	if (platform.system()=="Windows") :
+      		os.system('python TestPacketCaptureScript.py')
+	else :
+      		os.system('sudo -A python3 TestPacketCaptureScript.py')
+
 
 #display help
 def help():
@@ -357,7 +363,7 @@ def proxy_check():
 	progressBar['value'] = 100
 	s.configure("LabeledProgressbar", text="Analysed: {0}%".format(100))
 	update_ui()
-	tk.messagebox.showinfo("Proxy Probability", "Possibility of Proxy being used: {:.2%}".format(((knn_prob+mlp_prob)/2.0)))
+	tk.messagebox.showinfo("VPN Probability", "Possibility of Proxy being used: {:.2%}".format(((knn_prob+mlp_prob)/2.0)))
 	change_buttons_state('normal')
 
 

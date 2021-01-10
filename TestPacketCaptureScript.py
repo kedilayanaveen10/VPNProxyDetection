@@ -8,6 +8,21 @@ import tkinter.simpledialog as simpledialog
 import platform
 from toolTipText import *
 
+import time
+import sys
+
+#here is the animation for loading
+def animate():
+	global stop
+	global packet_count
+	animation = "|/-\\"
+	idx = 0
+	while stop == 0 :
+	    print("Capturing  ",animation[idx % len(animation)]," ==> ",packet_count, end="\r")
+	    idx += 1
+	    time.sleep(0.1)
+	print("\nDone !")
+
 #test_file is the name of the .csv file
 def packet_capture(test_file):
 	c = True
@@ -41,13 +56,13 @@ def packet_capture(test_file):
 			startButton['state'] = 'normal'
 			break
 		packet = s.recvfrom(65565)
-		
+
 		#Transfer tuple content to string type
 		packet = packet[0]
-		
+
 		#Take 1st 20 bytes for IP header
 		ip_header = packet[0:20]
-		
+
 		#Unpack from bytes format
 		iph = unpack('!BBHHHBBH4s4s', ip_header)
 		version_ihl = iph[0]
@@ -58,10 +73,10 @@ def packet_capture(test_file):
 		protocol = iph[6]
 		s_addr = socket.inet_ntoa(iph[8])
 		d_addr = socket.inet_ntoa(iph[9])
-		
+
 		#TCP header starts right after IP header and is ususally 20 bytes long
 		tcp_header = packet[20:40]
-		
+
 		#Unpack from byte format
 		tcph = unpack('!HHLLBBHHH', tcp_header)
 		source_port = tcph[0]
@@ -72,10 +87,10 @@ def packet_capture(test_file):
 		tcph_length = doff_reserved >> 4
 		h_size = iph_length + tcph_length * 4
 		data_size = len(packet) - h_size
-		
+
 		#Select byte containing TCP flags
 		tcpFlag = packet[33:34].hex()
-		
+
 		if tcpFlag == "01":
 			Flag = "FIN"
 		elif tcpFlag == "02":
@@ -98,15 +113,17 @@ def packet_capture(test_file):
 			Flag = "PSH-ACK"
 		else:
 			Flag = "OTH"
-		
+
 		#Select only HTTP/HTTPS packets for logging
 		if source_port == 80 or source_port == 443:
+			global packet_count
+			packet_count +=1
 			if source_port == 80:
 				writer.writerow([str(version), str(protocol), str(ttl), str(s_addr), str(d_addr), str(source_port), str(dest_port), str(sequence), str(ack), Flag, str(data_size), "HTTP"])
-				print("Packets captured")
+				# print("Packets captured")
 			else:
 				writer.writerow([str(version), str(protocol), str(ttl), str(s_addr), str(d_addr), str(source_port), str(dest_port), str(sequence), str(ack), Flag, str(data_size), "HTTPS"])
-				print("Packets captured")
+				# print("Packets captured")
 
 	#after stopping capture
 	outputFile.close()
@@ -130,8 +147,11 @@ def start_capture():
 		stopButton['state'] = 'disabled'
 		return
 	test_file_name += '.csv'
-	global stop
+	global stop, packet_count
 	stop = 0
+	packet_count = 0
+	animate_thread = Thread(target=animate)
+	animate_thread.start()
 
 	t1 = Thread(target=packet_capture, args=(test_file_name,))
 	t1.start()
