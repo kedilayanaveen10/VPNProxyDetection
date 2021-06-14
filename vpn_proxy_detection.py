@@ -1,11 +1,10 @@
 #importing necessary libraries
 import tkinter as tk #for GUI
-import tkinter.messagebox
+from tkinter import messagebox
 from tkinter.filedialog import askopenfilename #to select test dataset
 from tkinter.ttk import Progressbar, Style #to display progress
 from toolTipText import * #manually created to display tooltip text
 import os #to run other python scripts
-import platform
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split #for splitting dataset into train and test data
@@ -14,6 +13,9 @@ from sklearn.neighbors import KNeighborsClassifier #KNN classifier
 from sklearn.metrics import accuracy_score #to find accuracy of model
 from sklearn.tree import DecisionTreeClassifier #Decision Tree Classifier
 from sklearn.neural_network import MLPClassifier #MLP Classifier
+from sklearn.ensemble import RandomForestClassifier #Random Forest Classifier
+from sklearn.ensemble import AdaBoostClassifier #Ada Boost Classifier
+from sklearn.ensemble import GradientBoostingClassifier #Gradient Boosting Classifier
 from sklearn.metrics import f1_score #to find F1 score of model
 
 #window dimensions
@@ -36,19 +38,14 @@ def update_ui():
 	root.update_idletasks()
 	root.update()
 
-#Check blacklisted ip/domain
-def check_blacklist():
+#Check ip/domain in database
+def database_check():
 	clear_ui()
-	os.system('python3 rbl_check.py')
+	os.system('python3 db_check.py')
 
 def new_capture():
 	clear_ui()
-	#run script to create new packet capture file
-	if (platform.system()=="Windows") :
-      		os.system('python TestPacketCaptureScript.py')
-	else :
-      		os.system('sudo -A python3 TestPacketCaptureScript.py')
-
+	os.system('sudo -A python3 TestPacketCaptureScript.py') #run script to create new packet capture file
 
 #display help
 def help():
@@ -84,11 +81,16 @@ def help():
 	text=tk.Text(frame,width=250,height=60)
 	text.pack()
 	text.config(state="normal")
-	helpFile = open('README.md','r')
-	lines = helpFile.readlines()
-	for k, line in enumerate(lines):
-		text.insert('end', line)
-	text.config(state="disabled")
+	try:
+		helpFile = open('README.md','r')
+		lines = helpFile.readlines()
+		for k, line in enumerate(lines):
+			text.insert('end', line)
+		text.config(state="disabled")
+	except Exception as e:
+		tk.messagebox.showerror("Error: ", e)
+		change_buttons_state('normal')
+		return
 
 	popup.mainloop()		
 
@@ -106,12 +108,24 @@ def vpn_check():
 	update_ui()
 
 	#load datasets
-	vpnData = pd.read_csv('Datasets/Training/vpnDataset.csv')
+	try:
+		vpnData = pd.read_csv('Datasets/Training/vpnDataset.csv')
+	except Exception as e:
+		tk.messagebox.showerror("Error: ", e)
+		change_buttons_state('normal')
+		return
+
 	testFileName = get_test_dataset()
+	
 	if not testFileName:
 		change_buttons_state('normal')
 		return
-	testData = pd.read_csv(testFileName)
+	try:
+		testData = pd.read_csv(testFileName)
+	except Exception as e:
+		tk.messagebox.showerror("Error: ", e)
+		change_buttons_state('normal')
+		return
 
 	cols = ['Version', 'Protocol', 'TTL', 'SrcAddress', 'DestAddress', 'SrcPort', 'DestPort', 'SeqNum', 'AckNum', 'Flag', 'DataSize', 'Service']
 	test_cols = list(testData.columns.values)
@@ -192,7 +206,7 @@ def vpn_check():
 	y_pred = knn.predict(X_test)
 	y_predTest = knn.predict(X_testSet)
 
-	result['text'] = '\n\n------------------------'
+	result['text'] = '\n------------------------'
 	result['text'] += '\nKNN-Classifier'
 
 	result['text'] += "\nAccuracy of model on training dataset: " + str(accuracy_score(y_test,y_pred))
@@ -216,8 +230,8 @@ def vpn_check():
 	dt_prob = (sum(y_predTest)/len(y_predTest))
 	result['text'] += "\nProbability that VPN was used: " + str(dt_prob)
 
-	progressBar['value'] = 70
-	s.configure("LabeledProgressbar", text="Analysed: {0}%".format(70))
+	progressBar['value'] = 60
+	s.configure("LabeledProgressbar", text="Analysed: {0}%".format(60))
 	update_ui()
 
 	#MLP Classifier
@@ -232,10 +246,58 @@ def vpn_check():
 	result['text'] += "\nModel F1 score: " + str(f1_score(y_test,y_pred))
 	mlp_prob = (sum(y_predTest)/len(y_predTest))
 	result['text'] += "\nProbability that VPN was used: " + str(mlp_prob)
+	progressBar['value'] = 70
+	s.configure("LabeledProgressbar", text="Analysed: {0}%".format(70))
+	update_ui()
+
+	#RandomForest Classifier
+	clf = RandomForestClassifier(max_depth=15, random_state=0)
+	clf.fit(X_train, y_train)
+	y_pred = clf.predict(X_test)
+	y_predTest = clf.predict(X_testSet)
+	result['text'] += '\n\n------------------------'
+	result['text'] += '\nRandomForest Classifier'
+
+	result['text'] += "\nAccuracy of model on training dataset: " + str(accuracy_score(y_test,y_pred))
+	rfc_prob = (sum(y_predTest)/len(y_predTest))
+	result['text'] += "\nProbability that VPN was used: " + str(rfc_prob)
+	progressBar['value'] = 80
+	s.configure("LabeledProgressbar", text="Analysed: {0}%".format(80))
+	update_ui()
+
+	#AdaBoost Classifier
+	clf = AdaBoostClassifier(n_estimators=100, random_state=0)
+	clf.fit(X_train, y_train)
+	y_pred = clf.predict(X_test)
+	y_predTest = clf.predict(X_testSet)
+
+	result['text'] += '\n\n------------------------'
+	result['text'] += '\nAdaBoost Classifier'
+
+	result['text'] += "\nAccuracy of model on training dataset: " + str(accuracy_score(y_test,y_pred))
+	adb_prob = (sum(y_predTest)/len(y_predTest))
+	result['text'] += "\nProbability that VPN was used: " + str(adb_prob)
+	progressBar['value'] = 90
+	s.configure("LabeledProgressbar", text="Analysed: {0}%".format(90))
+	update_ui()
+
+	#GradientBoosting Classifier
+	clf = GradientBoostingClassifier(n_estimators=100, learning_rate=1.0,max_depth=1, random_state=0)
+	clf.fit(X_train, y_train)
+	y_pred = clf.predict(X_test)
+	y_predTest = clf.predict(X_testSet)
+
+	result['text'] += '\n\n------------------------'
+	result['text'] += '\nGradientBoosting Classifier'
+
+	result['text'] += "\nAccuracy of model on training dataset: " + str(accuracy_score(y_test,y_pred))
+	gbc_prob = (sum(y_predTest)/len(y_predTest))
+	result['text'] += "\nProbability that VPN was used: " + str(gbc_prob)
 	progressBar['value'] = 100
 	s.configure("LabeledProgressbar", text="Analysed: {0}%".format(100))
 	update_ui()
-	tk.messagebox.showinfo("VPN Probability", "Possibility of VPN being used: {:.2%}".format(((knn_prob+dt_prob+mlp_prob)/3.0)))
+
+	tk.messagebox.showinfo("VPN Probability", "Possibility of VPN being used: {:.2%}".format(((knn_prob+dt_prob+mlp_prob+rfc_prob+adb_prob+gbc_prob)/6.0)))
 	change_buttons_state('normal')
 
 
@@ -248,12 +310,24 @@ def proxy_check():
 	update_ui()
 
 	#load datasets
-	proxyData = pd.read_csv('Datasets/Training/proxyDataset.csv')
+	try:
+		proxyData = pd.read_csv('Datasets/Training/proxyDataset.csv')
+	except Exception as e:
+		tk.messagebox.showerror("Error: ", e)
+		change_buttons_state('normal')
+		return
+
 	testFileName = get_test_dataset()
+	
 	if not testFileName:
 		change_buttons_state('normal')
 		return
-	testData = pd.read_csv(testFileName)
+	try:
+		testData = pd.read_csv(testFileName)
+	except Exception as e:
+		tk.messagebox.showerror("Error: ", e)
+		change_buttons_state('normal')
+		return
 
 	cols = ['Version', 'Protocol', 'TTL', 'SrcAddress', 'DestAddress', 'SrcPort', 'DestPort', 'SeqNum', 'AckNum', 'Flag', 'DataSize', 'Service']
 	test_cols = list(testData.columns.values)
@@ -363,7 +437,7 @@ def proxy_check():
 	progressBar['value'] = 100
 	s.configure("LabeledProgressbar", text="Analysed: {0}%".format(100))
 	update_ui()
-	tk.messagebox.showinfo("VPN Probability", "Possibility of Proxy being used: {:.2%}".format(((knn_prob+mlp_prob)/2.0)))
+	tk.messagebox.showinfo("Proxy Probability", "Possibility of Proxy being used: {:.2%}".format(((knn_prob+mlp_prob)/2.0)))
 	change_buttons_state('normal')
 
 
@@ -389,9 +463,9 @@ proxyTestButton.place(relwidth=0.3, relheight=1)
 CreateToolTip(proxyTestButton,text="Check if a proxy was used on a .csv packet capture file")
 
 #button to check blacklisted ip/domain
-rblCheckButton = tk.Button(frame, text="RBL Check", font=('Courier', 12), bg='gray', command=lambda: check_blacklist())
+rblCheckButton = tk.Button(frame, text="Database Check", font=('Courier', 12), bg='gray', command=lambda: database_check())
 rblCheckButton.place(relx=0.35, relwidth=0.3, relheight=1)
-CreateToolTip(rblCheckButton,text="Check if an IP address or a domain is blacklisted in the RBL databases")
+CreateToolTip(rblCheckButton,text="Check if an IP address or a domain in databases")
 
 #button to check vpn
 vpnTestButton = tk.Button(frame, text="VPN Check", font=('Courier',12), bg='gray', command=lambda: vpn_check())
@@ -433,8 +507,9 @@ CreateToolTip(helpButton,text="Instructions to use")
 
 #button to create new test capture file
 newCaptureButton = tk.Button(root, text="New Capture", bd=3, font=('Courier',12), bg='gray', command=lambda:new_capture())
-newCaptureButton.place(relx=0.1, rely=0.9, relwidth=0.2, relheight=0.1)
+newCaptureButton.place(relx=0.15, rely=0.9, relwidth=0.2, relheight=0.1)
 CreateToolTip(newCaptureButton,text="Create a new test packet capture")
+
 
 #variable holding all button variables
 buttons = [proxyTestButton, vpnTestButton, rblCheckButton, clearButton, helpButton, newCaptureButton]

@@ -1,5 +1,5 @@
 
-Required Operating System: Ubuntu 20.04
+Required Operating System: Ubuntu 20.04 or later
 
 
 NECESSARY MODULES/LIBRARIES and PREREQUISITES:
@@ -13,6 +13,8 @@ NECESSARY MODULES/LIBRARIES and PREREQUISITES:
 	-pandas (pip3 install pandas)
 	
 	-sklearn (pip3 install -U scikit-learn)
+
+	-pathvalidate (sudo pip3 install pathvalidate)
 	
 	-ssh-askpass (sudo apt-get install -y ssh-askpass)
 	
@@ -76,6 +78,14 @@ INSTRUCTIONS:
 	
 	-the test capture will be saved in (relative path) - /Datasets/Test/
 
-5.Get CSV file from Wireshark capture
+5.Quick Check
+
+	-This feature will check if an IP address or a domain is a VPN, Active VPN, Proxy, Tor endpoint, or an active tor endpoint.
+
+	-an API call is made to check the IP address or the domain name entered for VPN, Proxy or tor endpoint.
+
+	-the API call return the result in a matter of seconds and will not use any client-side resources.
+
+6.Get CSV file from Wireshark capture
 
 	-The file 'WiresharkToCSV.docx' contains the step by step instructions on how to get csv file of required specifications from a wireshark capture.
