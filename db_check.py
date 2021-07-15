@@ -188,15 +188,15 @@ frame = tk.Frame(root, bg='black', bd=5)
 frame.place(relx=0.5,rely=0.1,relwidth=0.75,relheight=0.7,anchor='n')
 
 ipCheckButton = tk.Button(frame, text="Check IP (RBL)", font=('Courier',12), bg='gray', command=lambda: ip_check())
-ipCheckButton.place(relx=0.1, rely=0.1, relwidth=0.3, relheight=0.25)
+ipCheckButton.place(relx=0.03, rely=0.1, relwidth=0.45, relheight=0.25)
 CreateToolTip(ipCheckButton, text="Check if an IP address is blacklisted in RBL databases")
 
 domainCheckButton = tk.Button(frame, text="Check Domain (RBL)", font=('Courier',12), bg='gray', command=lambda: domain_check())
-domainCheckButton.place(relx=0.6, rely=0.1, relwidth=0.35, relheight=0.25)
+domainCheckButton.place(relx=0.52, rely=0.1, relwidth=0.45, relheight=0.25)
 CreateToolTip(domainCheckButton, text="Check if a domain is blacklisted in RBL databases")
 
 torCheckButton = tk.Button(frame, text="Tor Check", font=('Courier',12), bg='gray', command=lambda: tor_check())
-torCheckButton.place(relx=0.3, rely=0.5, relwidth=0.35, relheight=0.25)
+torCheckButton.place(relx=0.15, rely=0.5, relwidth=0.7, relheight=0.25)
 CreateToolTip(torCheckButton, text="Check if an IP or domain for VPN/Proxy/Tor endpoint")
 
 status_label = tk.Label(frame, font=('Courier',12), anchor='s', justify='left', bd=1)
