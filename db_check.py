@@ -185,7 +185,7 @@ bg_label.place(relwidth=1,relheight=1)
 
 #creating frame for buttons
 frame = tk.Frame(root, bg='black', bd=5)
-frame.place(relx=0.5,rely=0.1,relwidth=0.75,relheight=0.7,anchor='n')
+frame.place(relx=0.5,rely=0.1,relwidth=0.90,relheight=0.7,anchor='n')
 
 ipCheckButton = tk.Button(frame, text="Check IP (RBL)", font=('Courier',12), bg='gray', command=lambda: ip_check())
 ipCheckButton.place(relx=0.03, rely=0.1, relwidth=0.45, relheight=0.25)
